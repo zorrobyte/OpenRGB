@@ -1,5 +1,7 @@
 # Rig lighting map (ROG Crosshair X870E Edition 20 build)
 
+> **Rebuild after a format:** see [`rig/README.md`](rig/README.md). `rig/setup.ps1` restores everything here in one go.
+
 Notes from mapping this rig's RGB with OpenRGB 1.1 on 2026-10-26.
 
 ## Setup facts
@@ -122,3 +124,9 @@ for t in range(int(sys.argv[1])):
 - Fork: https://github.com/zorrobyte/OpenRGB (`origin`); `upstream` is `CalcProgrammer1/OpenRGB`, a GitHub mirror.
 - The canonical repo and merge requests are at https://gitlab.com/CalcProgrammer1/OpenRGB. `glab` isn't logged in yet.
 - The Aura USB header limit is `AURA_ADDRESSABLE_MAX_LEDS = 500` (`Controllers/AsusAuraUSBController/AsusAuraUSBController/RGBController_AsusAuraUSB.h`).
+
+## Effects Plugin
+
+- Built from https://gitlab.com/OpenRGBDevelopers/OpenRGBEffectsPlugin at commit `2087656`, with its `OpenRGB` submodule pointed at our fork commit.
+- It's installed to `%APPDATA%\OpenRGB\plugins\OpenRGBEffectsPlugin.dll` and runs inside the OpenRGB GUI, which connects to the service as a client. Effects stop when the GUI closes; minimized to the tray is fine.
+- Effect settings live in `%APPDATA%\OpenRGB\plugins\settings`. `rig/sync-from-system.ps1` copies them into the repo.

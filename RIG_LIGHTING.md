@@ -27,7 +27,7 @@ Notes from mapping this rig's RGB with OpenRGB 1.1 on 2026-10-26.
 | 4 | ASUS ROG CROSSHAIR X870E EDITION 20 (Aura USB `0B05:1BED`) | Direct mode only, **no brightness setting**. Dim by scaling the color. |
 | 5 | Razer Kraken Ultimate | |
 
-Not visible to OpenRGB: the ROG Astral RTX 5090 and the Ryujin AIO (they still need Armoury Crate).
+The SDK ids above are from before the 5090 was added. With our build the 5090 is id 1 and everything after it shifts by one, so look devices up by name. The Ryujin AIO's only LEDs are its fans, on header 5.
 
 ### Motherboard ARGB headers (device 4)
 
@@ -48,12 +48,28 @@ PSU detail:
 
 Armoury Crate's `C:\Program Files (x86)\LightingService\LastProfile.xml` doesn't help with counts. It says 120 for headers 1–4, which is just the default for headers that can't report a count, and 48 for header 5, which is wrong.
 
-## Current look (not yet persistent)
+## Current look (saved, loads at boot)
 
-- All headers: RGB `0,3,0` (about 1% green).
+- Board headers and the 5090: RGB `0,3,0` (about 1% green).
 - RAM: Direct mode, green `0,255,0`, brightness 1.
+- Razer keyboard, mouse, dock and headset: `0,255,0`.
 
-None of this is saved: a reboot resets it, and Armoury Crate takes over again.
+It's saved as the profile `rig-green` (`service_config\profilesig-green.json`). `OpenRGB.json` → `ProfileManager` → `service_startup_profile` and `resume_profile` both point at it.
+- openrgb-python (SDK v4) **can't** save profiles. The server only accepts saves from a protocol-6 client that sets `NET_CLIENT_FLAG_REQUEST_LOCAL_CLIENT`.
+- To save anyway: send packets 50 (name), 40 (protocol 6), 52 (flags `1<<16`), then 151 with the profile name.
+
+## Vendor software status
+
+- Armoury Crate and Razer Chroma were uninstalled; the ASUS services had been disabled first.
+- Razer Synapse is still installed for DPI and macros, with **lighting brightness set to Off in Synapse**. With brightness off, Synapse leaves the lights to OpenRGB.
+- Windows Dynamic Lighting is off (`HKCU\Software\Microsoft\Lighting\AmbientLightingEnabled = 0`).
+
+## RTX 5090 Edition 20
+
+- PCI subsystem `1043:8A8C`, with an ENE SMBus controller at `0x67` on NvAPI I2C. Registers `0xA0`–`0xAF` read back `0x00`–`0x0F`. It has 20 LEDs in one zone.
+- Support is added on branch `asus-astral-5090-edition20` (2 lines). That build is installed over `C:\Program Files\OpenRGB`.
+- To roll back: `winget install --force OpenRGB.OpenRGB`.
+- Build setup: Qt 6.8.3 msvc2022_64 and jom in `~/dev/tools`, using `qmake` + `jom` + `windeployqt` (same steps as `scripts/build-windows.bat`).
 
 ## Driving it from Python
 

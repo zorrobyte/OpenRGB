@@ -379,6 +379,7 @@
 #define ASUS_ROG_ASTRAL_LC_RTX_5090_O32G_GAMING                 0x89EC
 #define ASUS_ROG_ASTRAL_LC_OC_RTX_5090_O32G_GAMING              0x89ED
 #define ASUS_ROG_MATRIX_PLATINUM_RTX_5090_P32G                  0x8A61
+#define ASUS_ROG_ASTRAL_RTX_5090_O32G_GAMING_EDT20              0x8A8C
 #define ASUS_TUF_RTX_5090_O32G_GAMING                           0x89EE
 #define ASUS_TUF_RTX_5090_32G_GAMING                            0x89EF
 #define ASUS_AREZ_STRIX_VEGA56_08G_GAMING                       0x0555

@@ -447,6 +447,72 @@
         "hysteresisDown": 3,
         "responseUp": 3,
         "responseDown": 20
+      },
+      {
+        "name": "Q-Fan RAM",
+        "sensor": "/memory/dimm/0/temperature/0, /memory/dimm/1/temperature/0, /memory/dimm/2/temperature/0, /memory/dimm/3/temperature/0",
+        "points": [
+          {
+            "t": 0,
+            "p": 15
+          },
+          {
+            "t": 50,
+            "p": 15
+          },
+          {
+            "t": 56,
+            "p": 30
+          },
+          {
+            "t": 62,
+            "p": 50
+          },
+          {
+            "t": 68,
+            "p": 75
+          },
+          {
+            "t": 74,
+            "p": 100
+          }
+        ],
+        "hysteresisDown": 3,
+        "responseUp": 5,
+        "responseDown": 30
+      },
+      {
+        "name": "Q-Fan NVMe",
+        "sensor": "/nvme/2/temperature/0, /nvme/3/temperature/0",
+        "points": [
+          {
+            "t": 0,
+            "p": 0
+          },
+          {
+            "t": 55,
+            "p": 0
+          },
+          {
+            "t": 62,
+            "p": 25
+          },
+          {
+            "t": 68,
+            "p": 50
+          },
+          {
+            "t": 74,
+            "p": 80
+          },
+          {
+            "t": 78,
+            "p": 100
+          }
+        ],
+        "hysteresisDown": 3,
+        "responseUp": 5,
+        "responseDown": 40
       }
     ],
     "channels": [
@@ -525,6 +591,19 @@
         "stopPercent": 6,
         "stepUp": 50,
         "stepDown": 8
+      },
+      {
+        "name": "Memory Q-Fan",
+        "control": "/asus-ec/0/control/0",
+        "curves": [
+          "Q-Fan RAM",
+          "Q-Fan NVMe"
+        ],
+        "minPercent": 0,
+        "startPercent": 0,
+        "stopPercent": 0,
+        "stepUp": 10,
+        "stepDown": 2
       }
     ]
   },

@@ -9,6 +9,8 @@
 |   SPDX-License-Identifier: GPL-2.0-or-later               |
 \*---------------------------------------------------------*/
 
+#include <map>
+#include <memory>
 #include <string.h>
 #include "RazerController.h"
 #include "RazerDevices.h"
@@ -17,12 +19,36 @@
 
 using namespace std::chrono_literals;
 
+/*--------------------------------------------------------------------*\
+| Controllers that share one HID interface (the Mouse Dock Pro and a   |
+| mouse paired to it) share one send mutex, so that a command and the  |
+| wait for its completion never interleave with another command to the |
+| same interface                                                       |
+\*--------------------------------------------------------------------*/
+static std::shared_ptr<std::recursive_mutex> GetSendMutexForPath(const std::string& path)
+{
+    static std::mutex                                                   map_mutex;
+    static std::map<std::string, std::weak_ptr<std::recursive_mutex>>  mutex_map;
+
+    std::lock_guard<std::mutex>             map_lock(map_mutex);
+    std::shared_ptr<std::recursive_mutex>   send_mutex = mutex_map[path].lock();
+
+    if(!send_mutex)
+    {
+        send_mutex      = std::make_shared<std::recursive_mutex>();
+        mutex_map[path] = send_mutex;
+    }
+
+    return(send_mutex);
+}
+
 RazerController::RazerController(hid_device* dev_handle, hid_device* dev_argb_handle, const char* path, unsigned short pid, std::string dev_name)
 {
     dev               = dev_handle;
     dev_argb          = dev_argb_handle;
     dev_pid           = pid;
     location          = path;
+    send_mutex        = GetSendMutexForPath(location);
     name              = dev_name;
     device_index      = 0;
     effect_list_valid = false;
@@ -218,9 +244,18 @@ void RazerController::SetLEDs(RGBColor* colors)
     \*---------------------------------------------------------*/
     unsigned char* output_array = new unsigned char[matrix_cols * 3];
 
-    /*---------------------------------------------------------*\
-    | Send one row of the custom frame at a time                |
-    \*---------------------------------------------------------*/
+    /*-------------------------------------------------------------------*\
+    | Send one row of the custom frame at a time.  A row does not fit in  |
+    | fewer reports (at most 25 LEDs fit in one report).                  |
+    |                                                                     |
+    | Matrix keyboards hold off each feature report until they have       |
+    | processed the previous one (a row write takes ~4 ms on a BlackWidow |
+    | V4 Pro and its status reads back as success right away), so 1 ms    |
+    | sleeps between rows only slow multi-row frames down by a quarter.   |
+    | Keep them for single-row devices, which may not do that.            |
+    \*-------------------------------------------------------------------*/
+    bool pace_rows = (matrix_rows == 1);
+
     for (unsigned int row = 0; row < matrix_rows; row++)
     {
         unsigned int row_offset = (row * matrix_cols);
@@ -239,12 +274,18 @@ void RazerController::SetLEDs(RGBColor* colors)
         /*-----------------------------------------------------*\
         | Send the output array to the device                   |
         \*-----------------------------------------------------*/
-        std::this_thread::sleep_for(1ms);
+        if(pace_rows)
+        {
+            std::this_thread::sleep_for(1ms);
+        }
 
         razer_set_custom_frame(row, 0, matrix_cols - 1, output_array);
     }
 
-    std::this_thread::sleep_for(1ms);
+    if(pace_rows)
+    {
+        std::this_thread::sleep_for(1ms);
+    }
 
     /*---------------------------------------------------------*\
     | Set custom mode to apply frame                            |
@@ -2092,9 +2133,24 @@ int RazerController::razer_usb_send(razer_report* report)
 {
     report->crc = razer_calculate_crc(report);
 
-    std::lock_guard<std::mutex> send_lock(send_mutex);
-    DeviceGuardLock _ = guard_manager_ptr->AwaitExclusiveAccess();
-    int ret = hid_send_feature_report(dev, (unsigned char*)report, sizeof(*report));
+    /*--------------------------------------------------------------------*\
+    | The send mutex serializes commands to this HID interface across all  |
+    | controllers using it, including the wait for completion below.       |
+    |                                                                      |
+    | The device guard is a system-wide mutex shared by every Razer device |
+    | (and by Razer's software), so hold it only for each transfer and not |
+    | while waiting.  Holding it while a mouse behind the dock waited for  |
+    | its command to be relayed (~10-20 ms) made a BlackWidow V4 Pro wait  |
+    | that long before each of its 9 reports per frame (~6 frames/s).      |
+    \*--------------------------------------------------------------------*/
+    std::lock_guard<std::recursive_mutex> send_lock(*send_mutex);
+
+    int ret;
+
+    {
+        DeviceGuardLock _ = guard_manager_ptr->AwaitExclusiveAccess();
+        ret = hid_send_feature_report(dev, (unsigned char*)report, sizeof(*report));
+    }
 
     /*-----------------------------------------------------------------*\
     | Devices behind a receiver (e.g. a mouse on the Mouse Dock Pro)    |
@@ -2106,10 +2162,21 @@ int RazerController::razer_usb_send(razer_report* report)
         for(unsigned int attempt = 0; attempt < 50; attempt++)
         {
             razer_report response = razer_create_response();
+            int          read_ret;
 
-            std::this_thread::sleep_for(2ms);
+            /*--------------------------------------------------------------*\
+            | The dock takes ~10 ms to relay a command, so wait that long    |
+            | before the first poll: every poll is a USB transfer that other |
+            | devices (on the same hub) then have to wait for                |
+            \*--------------------------------------------------------------*/
+            std::this_thread::sleep_for((attempt == 0) ? 8ms : 2ms);
 
-            if(hid_get_feature_report(dev, (unsigned char*)&response, sizeof(response)) < 0)
+            {
+                DeviceGuardLock _ = guard_manager_ptr->AwaitExclusiveAccess();
+                read_ret = hid_get_feature_report(dev, (unsigned char*)&response, sizeof(response));
+            }
+
+            if(read_ret < 0)
             {
                 break;
             }

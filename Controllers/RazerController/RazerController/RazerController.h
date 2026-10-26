@@ -13,6 +13,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -318,7 +319,7 @@ private:
     \*---------------------------------------------------------*/
     unsigned char           dev_transaction_id;
     bool                    wait_for_response;
-    std::mutex              send_mutex;
+    std::shared_ptr<std::recursive_mutex> send_mutex;
     unsigned char           dev_led_id;
     bool                    effect_list_valid;
     bool                    supported_effects[256];

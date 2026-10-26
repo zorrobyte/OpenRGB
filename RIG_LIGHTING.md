@@ -54,7 +54,7 @@ Armoury Crate's `C:\Program Files (x86)\LightingService\LastProfile.xml` doesn't
 - RAM: Direct mode, green `0,255,0`, brightness 1.
 - Razer keyboard, mouse, dock and headset: `0,255,0`.
 
-It's saved as the profile `rig-green` (`service_config\profilesig-green.json`). `OpenRGB.json` → `ProfileManager` → `service_startup_profile` and `resume_profile` both point at it.
+It's saved as the profile `rig-green` (`service_config\profiles\rig-green.json`). `OpenRGB.json` → `ProfileManager` → `service_startup_profile` and `resume_profile` both point at it.
 - openrgb-python (SDK v4) **can't** save profiles. The server only accepts saves from a protocol-6 client that sets `NET_CLIENT_FLAG_REQUEST_LOCAL_CLIENT`.
 - To save anyway: send packets 50 (name), 40 (protocol 6), 52 (flags `1<<16`), then 151 with the profile name.
 

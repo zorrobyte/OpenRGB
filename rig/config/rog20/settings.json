@@ -1,0 +1,557 @@
+{
+  "gpu": {
+    "playlist": [
+      {
+        "scene": "monitor",
+        "seconds": 45,
+        "enabled": true
+      },
+      {
+        "scene": "blackwell",
+        "seconds": 40,
+        "enabled": true
+      },
+      {
+        "scene": "meme-9000",
+        "seconds": 30,
+        "enabled": true
+      },
+      {
+        "scene": "boost",
+        "seconds": 40,
+        "enabled": true
+      },
+      {
+        "scene": "meme-crysis",
+        "seconds": 30,
+        "enabled": true
+      },
+      {
+        "scene": "vram",
+        "seconds": 40,
+        "enabled": true
+      },
+      {
+        "scene": "meme-connector",
+        "seconds": 30,
+        "enabled": true
+      },
+      {
+        "scene": "astral-cooling",
+        "seconds": 40,
+        "enabled": true
+      },
+      {
+        "scene": "meme-rgb",
+        "seconds": 30,
+        "enabled": true
+      },
+      {
+        "scene": "engines",
+        "seconds": 40,
+        "enabled": true
+      },
+      {
+        "scene": "monitor",
+        "seconds": 45,
+        "enabled": true
+      },
+      {
+        "scene": "meme-power",
+        "seconds": 30,
+        "enabled": true
+      },
+      {
+        "scene": "thermals",
+        "seconds": 40,
+        "enabled": true
+      },
+      {
+        "scene": "aurora",
+        "seconds": 40,
+        "enabled": true
+      },
+      {
+        "scene": "cluster",
+        "seconds": 40,
+        "enabled": true
+      }
+    ],
+    "gameAuto": true,
+    "gameBeatsPin": true
+  },
+  "aio": {
+    "playlist": [
+      {
+        "scene": "monitor",
+        "seconds": 45,
+        "enabled": true
+      },
+      {
+        "scene": "meme-fine",
+        "seconds": 30,
+        "enabled": true
+      },
+      {
+        "scene": "ryzen",
+        "seconds": 40,
+        "enabled": true
+      },
+      {
+        "scene": "threads",
+        "seconds": 40,
+        "enabled": true
+      },
+      {
+        "scene": "meme-stonks",
+        "seconds": 30,
+        "enabled": true
+      },
+      {
+        "scene": "memory",
+        "seconds": 40,
+        "enabled": true
+      },
+      {
+        "scene": "cooling",
+        "seconds": 40,
+        "enabled": true
+      },
+      {
+        "scene": "meme-brrr",
+        "seconds": 30,
+        "enabled": true
+      },
+      {
+        "scene": "meme-ram",
+        "seconds": 30,
+        "enabled": true
+      },
+      {
+        "scene": "monitor",
+        "seconds": 45,
+        "enabled": true
+      },
+      {
+        "scene": "core-power",
+        "seconds": 40,
+        "enabled": true
+      },
+      {
+        "scene": "meme-errors",
+        "seconds": 30,
+        "enabled": true
+      },
+      {
+        "scene": "hourglass",
+        "seconds": 40,
+        "enabled": true
+      },
+      {
+        "scene": "radar",
+        "seconds": 40,
+        "enabled": true
+      },
+      {
+        "scene": "glance",
+        "seconds": 40,
+        "enabled": true
+      },
+      {
+        "scene": "scope",
+        "seconds": 30,
+        "enabled": true
+      }
+    ],
+    "gameAuto": true,
+    "gameBeatsPin": true
+  },
+  "brightnessDay": 58,
+  "brightnessNight": 30,
+  "offAfterMinutes": 0,
+  "fps": 24,
+  "scale": 0.5,
+  "native": false,
+  "pixelShift": true,
+  "fans": {
+    "enabled": true,
+    "curves": [
+      {
+        "name": "Pump CPU",
+        "sensor": "/amdcpu/0/temperature/2",
+        "points": [
+          {
+            "t": 0,
+            "p": 35
+          },
+          {
+            "t": 60,
+            "p": 35
+          },
+          {
+            "t": 70,
+            "p": 50
+          },
+          {
+            "t": 80,
+            "p": 75
+          },
+          {
+            "t": 88,
+            "p": 100
+          }
+        ],
+        "hysteresisDown": 3,
+        "responseUp": 2,
+        "responseDown": 15
+      },
+      {
+        "name": "Rad CPU",
+        "sensor": "/amdcpu/0/temperature/2",
+        "points": [
+          {
+            "t": 0,
+            "p": 0
+          },
+          {
+            "t": 60,
+            "p": 0
+          },
+          {
+            "t": 66,
+            "p": 12
+          },
+          {
+            "t": 72,
+            "p": 28
+          },
+          {
+            "t": 78,
+            "p": 50
+          },
+          {
+            "t": 83,
+            "p": 75
+          },
+          {
+            "t": 88,
+            "p": 100
+          }
+        ],
+        "hysteresisDown": 3,
+        "responseUp": 2,
+        "responseDown": 15
+      },
+      {
+        "name": "Rad GPU",
+        "sensor": "/gpu-nvidia/0/temperature/0",
+        "points": [
+          {
+            "t": 0,
+            "p": 0
+          },
+          {
+            "t": 68,
+            "p": 0
+          },
+          {
+            "t": 74,
+            "p": 15
+          },
+          {
+            "t": 80,
+            "p": 40
+          },
+          {
+            "t": 85,
+            "p": 80
+          },
+          {
+            "t": 90,
+            "p": 100
+          }
+        ],
+        "hysteresisDown": 3,
+        "responseUp": 3,
+        "responseDown": 20
+      },
+      {
+        "name": "Blower GPU",
+        "sensor": "/gpu-nvidia/0/temperature/0",
+        "points": [
+          {
+            "t": 0,
+            "p": 0
+          },
+          {
+            "t": 58,
+            "p": 0
+          },
+          {
+            "t": 64,
+            "p": 15
+          },
+          {
+            "t": 70,
+            "p": 30
+          },
+          {
+            "t": 76,
+            "p": 55
+          },
+          {
+            "t": 82,
+            "p": 85
+          },
+          {
+            "t": 86,
+            "p": 100
+          }
+        ],
+        "hysteresisDown": 3,
+        "responseUp": 3,
+        "responseDown": 20
+      },
+      {
+        "name": "Blower NVMe1",
+        "sensor": "/nvme/1/temperature/0",
+        "points": [
+          {
+            "t": 0,
+            "p": 0
+          },
+          {
+            "t": 60,
+            "p": 0
+          },
+          {
+            "t": 64,
+            "p": 15
+          },
+          {
+            "t": 68,
+            "p": 35
+          },
+          {
+            "t": 72,
+            "p": 65
+          },
+          {
+            "t": 76,
+            "p": 100
+          }
+        ],
+        "hysteresisDown": 3,
+        "responseUp": 5,
+        "responseDown": 40
+      },
+      {
+        "name": "Blower NVMe4",
+        "sensor": "/nvme/4/temperature/0",
+        "points": [
+          {
+            "t": 0,
+            "p": 0
+          },
+          {
+            "t": 60,
+            "p": 0
+          },
+          {
+            "t": 64,
+            "p": 15
+          },
+          {
+            "t": 68,
+            "p": 35
+          },
+          {
+            "t": 72,
+            "p": 65
+          },
+          {
+            "t": 76,
+            "p": 100
+          }
+        ],
+        "hysteresisDown": 3,
+        "responseUp": 5,
+        "responseDown": 40
+      },
+      {
+        "name": "Blower NVMe5",
+        "sensor": "/nvme/5/temperature/0",
+        "points": [
+          {
+            "t": 0,
+            "p": 0
+          },
+          {
+            "t": 60,
+            "p": 0
+          },
+          {
+            "t": 64,
+            "p": 15
+          },
+          {
+            "t": 68,
+            "p": 35
+          },
+          {
+            "t": 72,
+            "p": 65
+          },
+          {
+            "t": 76,
+            "p": 100
+          }
+        ],
+        "hysteresisDown": 3,
+        "responseUp": 5,
+        "responseDown": 40
+      },
+      {
+        "name": "GPU Core Fans",
+        "sensor": "/gpu-nvidia/0/temperature/0",
+        "points": [
+          {
+            "t": 0,
+            "p": 0
+          },
+          {
+            "t": 60,
+            "p": 0
+          },
+          {
+            "t": 64,
+            "p": 22
+          },
+          {
+            "t": 70,
+            "p": 40
+          },
+          {
+            "t": 75,
+            "p": 60
+          },
+          {
+            "t": 80,
+            "p": 85
+          },
+          {
+            "t": 84,
+            "p": 100
+          }
+        ],
+        "hysteresisDown": 3,
+        "responseUp": 3,
+        "responseDown": 20
+      }
+    ],
+    "channels": [
+      {
+        "name": "Radiator fans",
+        "control": "/lpc/nct6701d/0/control/1",
+        "curves": [
+          "Rad CPU",
+          "Rad GPU"
+        ],
+        "minPercent": 0,
+        "startPercent": 0,
+        "stopPercent": 0,
+        "stepUp": 25,
+        "stepDown": 4
+      },
+      {
+        "name": "Blower",
+        "control": "/lpc/nct6701d/0/control/2",
+        "curves": [
+          "Blower GPU",
+          "Blower NVMe1",
+          "Blower NVMe4",
+          "Blower NVMe5"
+        ],
+        "minPercent": 0,
+        "startPercent": 13,
+        "stopPercent": 7,
+        "stepUp": 30,
+        "stepDown": 5
+      },
+      {
+        "name": "Pump",
+        "control": "/lpc/nct6701d/0/control/5",
+        "curves": [
+          "Pump CPU"
+        ],
+        "minPercent": 35,
+        "startPercent": 0,
+        "stopPercent": 0,
+        "stepUp": 20,
+        "stepDown": 2
+      },
+      {
+        "name": "5090 fan 1",
+        "control": "/gpu-nvidia/0/control/1",
+        "curves": [
+          "GPU Core Fans"
+        ],
+        "minPercent": 0,
+        "startPercent": 9,
+        "stopPercent": 6,
+        "stepUp": 50,
+        "stepDown": 8
+      },
+      {
+        "name": "5090 fan 2",
+        "control": "/gpu-nvidia/0/control/2",
+        "curves": [
+          "GPU Core Fans"
+        ],
+        "minPercent": 0,
+        "startPercent": 9,
+        "stopPercent": 6,
+        "stepUp": 50,
+        "stepDown": 8
+      },
+      {
+        "name": "5090 fan 3",
+        "control": "/gpu-nvidia/0/control/3",
+        "curves": [
+          "GPU Core Fans"
+        ],
+        "minPercent": 0,
+        "startPercent": 9,
+        "stopPercent": 6,
+        "stepUp": 50,
+        "stepDown": 8
+      }
+    ]
+  },
+  "rgb": {
+    "enabled": true,
+    "host": "127.0.0.1",
+    "port": 6742,
+    "effect": "static",
+    "color": "#00FF00",
+    "color2": "#0040FF",
+    "brightness": 100,
+    "speed": 1,
+    "profile": "rig-green",
+    "tempSensor": "/amdcpu/0/temperature/2",
+    "tempLow": 45,
+    "tempHigh": 85,
+    "devices": [
+      {
+        "name": "Kingston Fury DDR5 DRAM",
+        "enabled": true,
+        "brightness": 100,
+        "mode": "Static",
+        "modeColor": "#000000",
+        "modeSpeed": null,
+        "modeBrightness": 0,
+        "leds": []
+      }
+    ]
+  }
+}

@@ -1,4 +1,5 @@
-# One-shot rebuild of the rig's RGB setup on a fresh Windows install.
+# One-shot rebuild of the rig's RGB, fan and screen setup on a fresh Windows install: our OpenRGB fork as a headless
+# service, and the Rog20 master app (Rog20Monitor engine + Rog20Control UI) driving the screens, fans and lights.
 # Run from an elevated PowerShell:  powershell -ExecutionPolicy Bypass -File rig\setup.ps1
 # Every step is idempotent; re-running it is safe.
 
@@ -6,8 +7,9 @@ param(
     [string]$Dev   = "$env:USERPROFILE\dev",
     [string]$Fork  = "https://github.com/zorrobyte/OpenRGB.git",
     [string]$Branch = "asus-astral-5090-edition20",
-    [string]$EffectsRepo   = "https://gitlab.com/OpenRGBDevelopers/OpenRGBEffectsPlugin.git",
-    [string]$EffectsCommit = "2087656e24fecd1378d0fbacfcd7e3ff1ba627b1",
+    [string]$AppRepo   = "https://github.com/zorrobyte/asus-20th-lcd-reactor.git",
+    [string]$AppBranch = "master-app",
+    [string]$AppDir    = "$env:USERPROFILE\Projects\asus-20th-lcd-reactor",
     [string]$QtVer = "6.8.3",
     [switch]$SkipVendorCleanup
 )
@@ -25,7 +27,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 #--------------------------------------------------------------------------------
-Step "Prerequisites (winget): git, uv, Python, VS Build Tools, PawnIO, OpenRGB"
+Step "Prerequisites (winget): git, uv, Python, VS Build Tools, .NET 10 SDK, PawnIO, OpenRGB"
 #--------------------------------------------------------------------------------
 $pkgs = @(
     @{ id = "Git.Git" },
@@ -33,6 +35,7 @@ $pkgs = @(
     @{ id = "Python.Python.3.13" },
     @{ id = "namazso.PawnIO" },
     @{ id = "OpenRGB.OpenRGB" },
+    @{ id = "Microsoft.DotNet.SDK.10" },
     @{ id = "Microsoft.VisualStudio.2022.BuildTools"; extra = "--override `"--wait --quiet --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended`"" }
 )
 foreach ($p in $pkgs) {
@@ -107,18 +110,6 @@ cmd /c "`"$Rig\build-openrgb.bat`" `"$Dev\OpenRGB`" `"$QtBin`" `"$Tools\jom`""
 if ($LASTEXITCODE -ne 0) { throw "OpenRGB build failed ($LASTEXITCODE)" }
 
 #--------------------------------------------------------------------------------
-Step "Clone and build the Effects Plugin against the fork"
-#--------------------------------------------------------------------------------
-$fx = "$Dev\OpenRGBEffectsPlugin"
-if (-not (Test-Path "$fx\.git")) { git clone --recurse-submodules $EffectsRepo $fx }
-git -C $fx checkout -q $EffectsCommit
-git -C $fx submodule update --init --recursive
-git -C "$fx\OpenRGB" fetch -q "$Dev\OpenRGB" $forkCommit
-git -C "$fx\OpenRGB" checkout -q $forkCommit
-cmd /c "`"$Rig\build-effects.bat`" `"$fx`" `"$QtBin`" `"$Tools\jom`""
-if ($LASTEXITCODE -ne 0) { throw "Effects plugin build failed ($LASTEXITCODE)" }
-
-#--------------------------------------------------------------------------------
 Step "Install our OpenRGB build over $Install and (re)create the service"
 #--------------------------------------------------------------------------------
 if (Get-Service OpenRGB -ErrorAction SilentlyContinue) { Stop-Service OpenRGB -Force }
@@ -143,12 +134,55 @@ $py = (Get-Command python).Source
 Start-Service OpenRGB
 
 #--------------------------------------------------------------------------------
-Step "Effects Plugin for the GUI (per user)"
+Step "Rog20 master app ($AppBranch): screens, fans and RGB"
 #--------------------------------------------------------------------------------
-$plug = "$env:APPDATA\OpenRGB\plugins"
-New-Item -ItemType Directory -Force "$plug\settings\effect-profiles" | Out-Null
-Copy-Item "$fx\release\OpenRGBEffectsPlugin.dll" $plug -Force
-if (Test-Path "$Rig\config\plugin-settings") { Copy-Item "$Rig\config\plugin-settings\*" "$plug\settings\" -Recurse -Force }
+# The engine replaced FanControl (fan curves) and the OpenRGB GUI + Effects Plugin (lighting); OpenRGB stays only as
+# the service above, which the engine drives over the SDK on 127.0.0.1:6742.
+$fc = Get-ItemProperty HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* -ErrorAction SilentlyContinue | Where-Object DisplayName -eq FanControl
+if ($fc) { Start-Process "C:\Program Files (x86)\FanControl\unins000.exe" -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART" -Wait; Write-Host "uninstalled FanControl" }
+schtasks /Delete /TN FanControl /F 2>$null | Out-Null
+Remove-Item "$env:APPDATA\OpenRGB\plugins\OpenRGBEffectsPlugin.dll" -ErrorAction SilentlyContinue
 
-Step "Done. Open OpenRGB (it connects to the service) and check the device list."
-Write-Host "Expected: Kingston Fury DDR5 DRAM, ASUS ROG ASTRAL GeForce RTX 5090 OC EDITION 20, ROG CROSSHAIR X870E EDITION 20, Razer devices."
+if (-not (Test-Path "$AppDir\.git")) { git clone --branch $AppBranch $AppRepo $AppDir }
+$engineExe = "$AppDir\windows\Rog20Monitor\bin\Release\net10.0\Rog20Monitor.exe"
+if (Get-Process Rog20Monitor -ErrorAction SilentlyContinue) { & $engineExe --quit }   # never force-kill: it wedges the AIO screens
+foreach ($proj in 'Rog20Monitor', 'Rog20Control') {
+    dotnet build "$AppDir\windows\$proj" -c Release -v q -nologo
+    if ($LASTEXITCODE -ne 0) { throw "$proj build failed ($LASTEXITCODE)" }
+}
+
+# Settings (screens, fan curves, lighting) as synced from the machine.
+$appCfg = "$env:APPDATA\Rog20Monitor"
+New-Item -ItemType Directory -Force $appCfg | Out-Null
+if (Test-Path "$Rig\config\rog20\settings.json") { Copy-Item "$Rig\config\rog20\*" $appCfg -Force }
+
+# The engine at logon, elevated (LibreHardwareMonitor needs admin for the fan registers), no time limit.
+$me = [Security.Principal.WindowsIdentity]::GetCurrent()
+$esc = { param($v) [Security.SecurityElement]::Escape($v) }
+$xml = @"
+<?xml version="1.0" encoding="UTF-16"?>
+<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo><Description>ROG Edition 20: Rog20Monitor engine (screens, fans, RGB).</Description></RegistrationInfo>
+  <Triggers><LogonTrigger><Enabled>true</Enabled><UserId>$(& $esc $me.Name)</UserId><Delay>PT5S</Delay></LogonTrigger></Triggers>
+  <Principals><Principal id="Author"><UserId>$($me.User.Value)</UserId><LogonType>InteractiveToken</LogonType><RunLevel>HighestAvailable</RunLevel></Principal></Principals>
+  <Settings>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <IdleSettings><StopOnIdleEnd>false</StopOnIdleEnd><RestartOnIdle>false</RestartOnIdle></IdleSettings>
+    <AllowStartOnDemand>true</AllowStartOnDemand>
+    <Enabled>true</Enabled>
+    <ExecutionTimeLimit>PT0S</ExecutionTimeLimit>
+    <Priority>5</Priority>
+  </Settings>
+  <Actions Context="Author"><Exec><Command>$(& $esc $engineExe)</Command><Arguments>--background</Arguments><WorkingDirectory>$(& $esc (Split-Path $engineExe))</WorkingDirectory></Exec></Actions>
+</Task>
+"@
+$xmlPath = "$env:TEMP\Rog20Monitor-task.xml"
+[IO.File]::WriteAllText($xmlPath, $xml, [Text.Encoding]::Unicode)
+schtasks /Create /TN Rog20Monitor /XML $xmlPath /F | Out-Null
+schtasks /Run /TN Rog20Monitor | Out-Null
+
+Step "Done. Open Rog20Control ($AppDir\windows\Rog20Control\bin\Release\net10.0-windows) and check the FANS and RGB pages."
+Write-Host "Expected RGB devices: Kingston Fury DDR5 DRAM, ASUS ROG ASTRAL GeForce RTX 5090 OC EDITION 20, ROG CROSSHAIR X870E EDITION 20, Razer devices."
+Write-Host "The screens' Android side (sideloaded app) is separate; see the app repo's docs."

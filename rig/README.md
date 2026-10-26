@@ -13,22 +13,21 @@ powershell -ExecutionPolicy Bypass -File $env:USERPROFILE\dev\rig\rig\setup.ps1
 ```
 
 `setup.ps1` is idempotent. It does the following:
-1. Installs Git, uv, Python 3.13, PawnIO, OpenRGB (which provides the service) and the VS 2022 C++ Build Tools via winget.
+1. Installs Git, uv, Python 3.13, the .NET 10 SDK, PawnIO, OpenRGB (which provides the service) and the VS 2022 C++ Build Tools via winget.
 2. If Armoury Crate is present, runs ASUS's signed uninstall tool (you click through it). Then it disables the leftover ASUS and Razer Chroma services and turns off Windows Dynamic Lighting.
 3. Installs Qt 6.8.3 msvc2022_64 (via aqtinstall) and jom into `~/dev/tools`.
 4. Clones the fork's `asus-astral-5090-edition20` branch (RTX 5090 Edition 20 support) to `~/dev/OpenRGB` and builds it.
-5. Clones the OpenRGB Effects Plugin at a pinned commit, points its `OpenRGB` submodule at the fork commit so the headers match, and builds it.
-6. Copies the build over `C:\Program Files\OpenRGB`, creating the `OpenRGB` service if it's missing.
-7. Restores `profiles\*.json` into the service, and sets `rig-green` as the startup and resume profile.
-8. Installs the Effects Plugin and any saved plugin settings for the current user.
+5. Copies the build over `C:\Program Files\OpenRGB`, creating the `OpenRGB` service if it's missing.
+6. Restores `profiles\*.json` into the service, and sets `rig-green` as the startup and resume profile.
+7. Sets up the Rog20 master app (`zorrobyte/asus-20th-lcd-reactor`, branch `master-app`) in `~/Projects`: uninstalls FanControl and removes the old Effects Plugin, builds the Rog20Monitor engine and Rog20Control UI, restores `configog20\settings.json` (screens, fan curves, lighting), and registers the elevated `Rog20Monitor` logon task. The engine runs the fans and drives every light through the OpenRGB service's SDK, so the OpenRGB GUI isn't needed.
 
 ## Keeping the repo current
 
-After changing lighting or effects:
+After changing lighting, fan curves or screen settings:
 
 ```powershell
-powershell -File rig\sync-from-system.ps1   # pulls live profiles and plugin settings into the repo
-git add rig; git commit -m "Update rig profiles"; git push
+powershell -File rig\sync-from-system.ps1   # pulls live OpenRGB profiles and the Rog20 settings into the repo
+git add rig; git commit -m "Update rig settings"; git push
 ```
 
 ## Tools (`tools/`)

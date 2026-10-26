@@ -12,38 +12,13 @@
         "enabled": true
       },
       {
-        "scene": "meme-9000",
-        "seconds": 30,
-        "enabled": true
-      },
-      {
         "scene": "boost",
         "seconds": 40,
         "enabled": true
       },
       {
-        "scene": "meme-crysis",
-        "seconds": 30,
-        "enabled": true
-      },
-      {
         "scene": "vram",
         "seconds": 40,
-        "enabled": true
-      },
-      {
-        "scene": "meme-connector",
-        "seconds": 30,
-        "enabled": true
-      },
-      {
-        "scene": "astral-cooling",
-        "seconds": 40,
-        "enabled": true
-      },
-      {
-        "scene": "meme-rgb",
-        "seconds": 30,
         "enabled": true
       },
       {
@@ -57,17 +32,7 @@
         "enabled": true
       },
       {
-        "scene": "meme-power",
-        "seconds": 30,
-        "enabled": true
-      },
-      {
         "scene": "thermals",
-        "seconds": 40,
-        "enabled": true
-      },
-      {
-        "scene": "aurora",
         "seconds": 40,
         "enabled": true
       },
@@ -88,11 +53,6 @@
         "enabled": true
       },
       {
-        "scene": "meme-fine",
-        "seconds": 30,
-        "enabled": true
-      },
-      {
         "scene": "ryzen",
         "seconds": 40,
         "enabled": true
@@ -103,11 +63,6 @@
         "enabled": true
       },
       {
-        "scene": "meme-stonks",
-        "seconds": 30,
-        "enabled": true
-      },
-      {
         "scene": "memory",
         "seconds": 40,
         "enabled": true
@@ -115,16 +70,6 @@
       {
         "scene": "cooling",
         "seconds": 40,
-        "enabled": true
-      },
-      {
-        "scene": "meme-brrr",
-        "seconds": 30,
-        "enabled": true
-      },
-      {
-        "scene": "meme-ram",
-        "seconds": 30,
         "enabled": true
       },
       {
@@ -140,16 +85,6 @@
       {
         "scene": "meme-errors",
         "seconds": 30,
-        "enabled": true
-      },
-      {
-        "scene": "hourglass",
-        "seconds": 40,
-        "enabled": true
-      },
-      {
-        "scene": "radar",
-        "seconds": 40,
         "enabled": true
       },
       {
@@ -611,7 +546,7 @@
     "enabled": true,
     "host": "127.0.0.1",
     "port": 6742,
-    "effect": "static",
+    "effect": "wave",
     "color": "#00FF00",
     "color2": "#0040FF",
     "brightness": 100,
@@ -629,6 +564,51 @@
         "modeColor": "#000000",
         "modeSpeed": null,
         "modeBrightness": 0,
+        "leds": []
+      },
+      {
+        "name": "ENE DRAM",
+        "enabled": true,
+        "brightness": 100,
+        "mode": null,
+        "modeColor": null,
+        "modeSpeed": null,
+        "modeBrightness": null,
+        "leds": [
+          "#00FF00",
+          "#00FF00",
+          "#00FF00",
+          "#00FF00",
+          "#00FF00",
+          "#00FF00",
+          "#00FF00",
+          "#00FF00",
+          "#00FF00",
+          "#00FF00",
+          "#00FF00",
+          "#00FF00",
+          "#E5B544",
+          "#E5B544",
+          "#E5B544",
+          "#E5B544",
+          "#E5B544",
+          "#E5B544",
+          "#E5B544",
+          "#E5B544",
+          "#E5B544",
+          "#E5B544",
+          "#E5B544",
+          "#E5B544"
+        ]
+      },
+      {
+        "name": "Razer Mouse Dock Pro",
+        "enabled": true,
+        "brightness": 100,
+        "mode": "Static",
+        "modeColor": "#00FF00",
+        "modeSpeed": null,
+        "modeBrightness": null,
         "leds": []
       }
     ]
